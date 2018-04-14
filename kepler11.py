@@ -16,13 +16,24 @@ def v_orbit(radius):
 	return ((G * star_mass) / radius) ** 0.5
 
 
+def create_planet(p):
+	"""
+	Adds the planet into the scene from radio button press
+	"""
+
+	if p.checked:
+		s[p.id] = (sphere(pos=vec(dist_from_star[p.id]), radius=sizes[p.id], color=colors[p.id], make_trail=trails[p.id]))
+	else:
+		s[p.id].visible = False
+		s[p.id].clear_trail()
+		s[p.id] = 0
+
+
 # Constants
 G = 6.67428e-11  				# m^3 kg^-1 s^-2
 AU = 1.496e11  					# 1 au in meters
 m_sun = 1.989e30  				# kg
 m_earth = 5.976e24  			# kg
-# r_sun = 9.957e8					# m
-# r_earth = 6.37e6  				# m
 r_sun = 10						# Arbitrary number
 r_earth = 1						# Arbitrary numbers
 scale = 1e9  					# Scaling factor
@@ -91,41 +102,57 @@ x_pos = [0, a_b, a_c, a_d, a_e, a_f, a_g]
 
 y_pos = [0, 0, 0, 0, 0, 0, 0]
 
-dt = 5000
-
 s = []
 
 for n in range(0, len(names)):
 	s.append(sphere(pos=vec(dist_from_star[n]), radius=sizes[n], color=colors[n], make_trail=trails[n]))
 
+# radio buttons, where id values are the index position in names array
+rb = radio(bind=create_planet, checked=True, text='planet-b', id=1)
+rc = radio(bind=create_planet, checked=True, text='planet-c', id=2)
+rd = radio(bind=create_planet, checked=True, text='planet-d', id=3)
+re = radio(bind=create_planet, checked=True, text='planet-e', id=4)
+rf = radio(bind=create_planet, checked=True, text='planet-f', id=5)
+rg = radio(bind=create_planet, checked=True, text='planet-g', id=6)
+
+dt = 5000
+
 while True:
-	for n in range(1, len(names)):
-		rate(500)
 
-		y_pos[n] = y_pos[n] + y_vel[n] * dt
-		x_pos[n] = x_pos[n] + x_vel[n] * dt
-		x, y = x_pos[n], y_pos[n]
-		s[n].pos = vec(x / scale, y / scale, 0)
+	if len(s) > 1:
 
-		r = sqrt(x ** 2 + y ** 2)
+		for n in range(1, len(s)):
 
-		if r < 7e8:
-			print("%s HAS CRASHED INTO THE SUN!" % (names[n]))
-			break
+			try:
+				rate(500)
 
-		if r > 1e10 * 7e8:
-			print("%s HAS BEEN EJECTED FROM THE SYSTEM" % (names[n]))
-			break
+				y_pos[n] = y_pos[n] + y_vel[n] * dt
+				x_pos[n] = x_pos[n] + x_vel[n] * dt
+				x, y = x_pos[n], y_pos[n]
+				s[n].pos = vec(x / scale, y / scale, 0)
 
-		f = (G * mass_list[n] * mass_list[0]) / (r ** 2)
+				r = sqrt(x ** 2 + y ** 2)
 
-		angle = atan2(-y, -x)
+				if r < 7.5e6:
+					print("%s HAS CRASHED INTO THE SUN!" % (names[n]))
+					break
 
-		fx = cos(angle) * f
-		fy = sin(angle) * f
+				if r > 1e5 * 7.5e6:
+					print("%s HAS BEEN EJECTED FROM THE SYSTEM" % (names[n]))
+					break
 
-		ax = fx / mass_list[n]
-		ay = fy / mass_list[n]
+				f = (G * mass_list[n] * mass_list[0]) / (r ** 2)
 
-		x_vel[n] = x_vel[n] + (ax * dt)
-		y_vel[n] = y_vel[n] + (ay * dt)
+				angle = atan2(-y, -x)
+
+				fx = cos(angle) * f
+				fy = sin(angle) * f
+
+				ax = fx / mass_list[n]
+				ay = fy / mass_list[n]
+
+				x_vel[n] = x_vel[n] + (ax * dt)
+				y_vel[n] = y_vel[n] + (ay * dt)
+
+			except AttributeError:
+				pass
