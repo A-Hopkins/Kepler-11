@@ -22,11 +22,27 @@ def create_planet(p):
 	"""
 
 	if p.checked:
-		s[p.id] = (sphere(pos=vec(dist_from_star[p.id]), radius=sizes[p.id], color=colors[p.id], make_trail=trails[p.id]))
+		s.append(Planet(p.text, p.a, p.r, p.m, p.v, p.c))
 	else:
-		s[p.id].visible = False
-		s[p.id].clear_trail()
-		s[p.id] = 0
+		planet = next((i for i in s if i.name == p.text), None)
+		planet.visible = False
+		planet.clear_trail()
+		del s[s.index(planet)]
+
+
+class Planet(sphere):
+	def __init__(self, name, a, radius, mass, velocity, planet_color, **args):
+		super().__init__(**args)
+		self.name = name
+		self.a = a
+		self.radius = radius
+		self.mass = mass
+		self.x_pos = self.a
+		self.y_pos = 0
+		self.x_vel = 0
+		self.y_vel = velocity
+		self.planet_color = planet_color
+		sphere.__init__(self, pos=vec(self.a, 0, 0), radius=self.radius, color=self.planet_color, make_trail=True)
 
 
 # Constants
@@ -34,9 +50,8 @@ G = 6.67428e-11  				# m^3 kg^-1 s^-2
 AU = 1.496e11  					# 1 au in meters
 m_sun = 1.989e30  				# kg
 m_earth = 5.976e24  			# kg
-r_sun = 10						# Arbitrary number
-r_earth = 1						# Arbitrary numbers
-scale = 1e9  					# Scaling factor
+r_sun = 9.957e8					# m
+r_earth = 6.37e6  				# m
 
 # Star constants
 star_mass = 0.961 * m_sun  		# solar masses
@@ -75,84 +90,67 @@ v_e = v_orbit(a_e)  			# m/s
 v_f = v_orbit(a_f)  			# m/s
 v_g = v_orbit(a_g)  			# m/s
 
-names = ["Sun", "planet-b", "planet-c", "planet-d", "planet-e", "planet-f", "planet-g"]
-
-mass_list = [star_mass, m_b, m_c, m_d, m_e, m_f, m_g]
-
-sizes = [star_radius, r_b, r_c, r_d, r_e, r_f, r_g]
-
-colors = [color.yellow, color.green, color.cyan, color.blue, color.orange, color.magenta, color.red]
-
-trails = [True, True, True, True, True, True, True]
-
-initial_velocity = [v_star, v_b, v_c, v_d, v_e, v_f, v_g]
-
-x_vel = [0, 0, 0, 0, 0, 0, 0]
-
-y_vel = initial_velocity
-
 total_p = (m_b * v_b) + (m_c * v_c) + (m_d * v_d) + (m_e * v_e) + (m_f * v_f) + (m_g * v_g)
 
 v_star = -total_p / star_mass
 
-dist_from_star = [vec(0, 0, 0), vec(a_b / scale, 0, 0), vec(a_c / scale, 0, 0), vec(a_d / scale, 0, 0),
-				  vec(a_e / scale, 0, 0), vec(a_f / scale, 0, 0), vec(a_g / scale, 0, 0)]
-
-x_pos = [0, a_b, a_c, a_d, a_e, a_f, a_g]
-
-y_pos = [0, 0, 0, 0, 0, 0, 0]
-
-s = []
-
-for n in range(0, len(names)):
-	s.append(sphere(pos=vec(dist_from_star[n]), radius=sizes[n], color=colors[n], make_trail=trails[n]))
-
 # radio buttons, where id values are the index position in names array
-rb = radio(bind=create_planet, checked=True, text='planet-b', id=1)
-rc = radio(bind=create_planet, checked=True, text='planet-c', id=2)
-rd = radio(bind=create_planet, checked=True, text='planet-d', id=3)
-re = radio(bind=create_planet, checked=True, text='planet-e', id=4)
-rf = radio(bind=create_planet, checked=True, text='planet-f', id=5)
-rg = radio(bind=create_planet, checked=True, text='planet-g', id=6)
+rb = radio(bind=create_planet, checked=False, text='planet-b', a=a_b, r=r_b, m=m_b, v=v_b, c=color.green)
+rc = radio(bind=create_planet, checked=False, text='planet-c', a=a_c, r=r_c, m=m_c, v=v_c, c=color.cyan)
+rd = radio(bind=create_planet, checked=False, text='planet-d', a=a_d, r=r_d, m=m_d, v=v_d, c=color.blue)
+re = radio(bind=create_planet, checked=False, text='planet-e', a=a_e, r=r_e, m=m_e, v=v_e, c=color.orange)
+rf = radio(bind=create_planet, checked=False, text='planet-f', a=a_f, r=r_f, m=m_f, v=v_f, c=color.magenta)
+rg = radio(bind=create_planet, checked=False, text='planet-g', a=a_g, r=r_g, m=m_g, v=v_g, c=color.red)
+
+s = [Planet('kepler-11', 0, star_radius, star_mass, v_star, color.yellow),
+	 # Planet("planet-b", a_b, r_b, m_b, v_b, color.green),
+	 # Planet("planet-c", a_c, r_c, m_c, v_c, color.cyan),
+	 # Planet("planet-d", a_d, r_d, m_d, v_d, color.blue),
+	 # Planet("planet-e", a_e, r_e, m_e, v_e, color.orange),
+	 # Planet("planet-f", a_f, r_f, m_f, v_f, color.magenta),
+	 # Planet("planet-g", a_g, r_g, m_g, v_g, color.red),
+	 ]
 
 dt = 5000
 
 while True:
 
 	if len(s) > 1:
-
 		for n in range(1, len(s)):
-
 			try:
 				rate(500)
 
-				y_pos[n] = y_pos[n] + y_vel[n] * dt
-				x_pos[n] = x_pos[n] + x_vel[n] * dt
-				x, y = x_pos[n], y_pos[n]
-				s[n].pos = vec(x / scale, y / scale, 0)
+				s[n].x_pos = s[n].x_pos + s[n].x_vel * dt
+				s[n].y_pos = s[n].y_pos + s[n].y_vel * dt
+
+				x, y = s[n].x_pos, s[n].y_pos
+				s[n].pos = vec(x, y, 0)
 
 				r = sqrt(x ** 2 + y ** 2)
 
 				if r < 7.5e6:
-					print("%s HAS CRASHED INTO THE SUN!" % (names[n]))
+					print("%s HAS CRASHED INTO THE SUN!" % s[n].name)
 					break
 
-				if r > 1e5 * 7.5e6:
-					print("%s HAS BEEN EJECTED FROM THE SYSTEM" % (names[n]))
+				if r > 1e10 * 7.5e6:
+					print("%s HAS BEEN EJECTED FROM THE SYSTEM" % s[n].name)
 					break
 
-				f = (G * mass_list[n] * mass_list[0]) / (r ** 2)
+				for planet2 in s:
+					if s[n] != planet2:
 
-				angle = atan2(-y, -x)
+						f = (G * s[n].mass * star_mass) / (r ** 2)
 
-				fx = cos(angle) * f
-				fy = sin(angle) * f
+						angle = atan2(-y, -x)
 
-				ax = fx / mass_list[n]
-				ay = fy / mass_list[n]
+						fx = cos(angle) * f
+						fy = sin(angle) * f
 
-				x_vel[n] = x_vel[n] + (ax * dt)
-				y_vel[n] = y_vel[n] + (ay * dt)
+						ax = fx / s[n].mass
+						ay = fy / s[n].mass
 
-			except AttributeError:
+						s[n].x_vel = s[n].x_vel + (ax * dt)
+						s[n].y_vel = s[n].y_vel + (ay * dt)
+
+			except IndexError:
 				pass
