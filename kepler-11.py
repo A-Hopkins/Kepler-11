@@ -46,21 +46,21 @@ def create_planet(p):
 
 
 # Constants
-G = 6.67428e-11  				# m^3 kg^-1 s^-2
-AU = 1.496e11  					# 1 au in meters
-m_sun = 1.989e30  				# kg
+G = 6.67428e-11  			# m^3 kg^-1 s^-2
+AU = 1.496e11  				# 1 au in meters
+m_sun = 1.989e30  			# kg
 m_earth = 5.976e24  			# kg
-r_sun = 9.957e8					# m
-r_earth = 6.37e6  				# m
+r_sun = 9.957e8				# m
+r_earth = 6.37e6  			# m
 
 # Star constants
 m_star = 0.961 * m_sun  		# solar masses
 r_star = 1.065 * r_sun  		# Solar radii
-v_star = 0						# Essentially placeholder
+v_star = 0				# Essentially placeholder
 
 # Planet Masses
 m_b = 1.9 * m_earth 	 		# Earth masses
-m_c = 2.9 * m_earth				# Earth masses
+m_c = 2.9 * m_earth			# Earth masses
 m_d = 7.3 * m_earth 			# Earth masses
 m_e = 8.0 * m_earth  			# Earth masses
 m_f = 2.0 * m_earth  			# Earth masses
@@ -75,12 +75,12 @@ r_f = 2.49 * r_earth  			# Earth radii
 r_g = 3.33 * r_earth  			# Earth radii
 
 # Planet semi-major axes
-a_b = 0.091 * AU				# m
-a_c = 0.107 * AU				# m
-a_d = 0.155 * AU				# m
-a_e = 0.195 * AU				# m
-a_f = 0.250 * AU				# m
-a_g = 0.466 * AU  				# m
+a_b = 0.091 * AU			# m
+a_c = 0.107 * AU			# m
+a_d = 0.155 * AU			# m
+a_e = 0.195 * AU			# m
+a_f = 0.250 * AU			# m
+a_g = 0.466 * AU  			# m
 
 # Planet orbital velocities
 v_b = v_orbit(a_b)  			# m/s
@@ -120,10 +120,11 @@ while True:
 
 	rate(500)
 
-	# update the position of the objects
+	# Update the position of the objects
 	for planet in planets:
 		planet.pos += planet.velocity * dt
 
+	# Update the velocity after calculating the acceleration for all planets interacting on eachother
 	for planet1 in planets:
 		for planet2 in planets:
 			if planet1 != planet2:
